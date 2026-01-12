@@ -9,41 +9,21 @@ export const NAV_DATA = [
         icon: Icons.HomeIcon,
         items: [
           {
-            title: "eCommerce",
+            title: "Welcome",
             url: "/",
           },
         ],
       },
-      {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Icons.Calendar,
-        items: [],
-      },
-      {
-        title: "Profile",
-        url: "/profile",
-        icon: Icons.User,
-        items: [],
-      },
-      {
-        title: "Forms",
-        icon: Icons.Alphabet,
-        items: [
-          {
-            title: "Form Elements",
-            url: "/forms/form-elements",
-          },
-          {
-            title: "Form Layout",
-            url: "/forms/form-layout",
-          },
-        ],
-      },
+      // {
+      //   title: "Profile",
+      //   url: "/profile",
+      //   icon: Icons.User,
+      //   items: [],
+      // },
       {
         title: "Users",
         url: "/tables",
-        icon: Icons.Table,
+        icon: Icons.User,
         items: [
           {
             title: "Experts",
@@ -56,51 +36,75 @@ export const NAV_DATA = [
         ],
       },
       {
-        title: "Pages",
-        icon: Icons.Alphabet,
+        title: "Settlements",
+        icon: Icons.SettlementIcon,
         items: [
           {
-            title: "Settings",
-            url: "/pages/settings",
+            title: "Pending",
+            url: "/atlas/pending",
+          },
+          {
+            title: "Settled",
+            url: "/atlas/settled",
+          },
+          {
+            title: "Rejected",
+            url: "/atlas/rejected",
           },
         ],
       },
+      {
+        title: "System Wallet",
+        url: "/atlas/system",
+        icon: Icons.WalletIcon,
+        items: [],
+      },
+      // {
+      //   title: "System Wallet",
+      //   icon: Icons.Alphabet,
+      //   items: [
+      //     {
+      //       title: "Settings",
+      //       url: "/pages/settings",
+      //     },
+      //   ],
+      // },
     ],
   },
   {
     label: "OTHERS",
     items: [
+      // {
+      //   title: "Charts",
+      //   icon: Icons.PieChart,
+      //   items: [
+      //     {
+      //       title: "Basic Chart",
+      //       url: "/charts/basic-chart",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "UI Elements",
+      //   icon: Icons.FourCircle,
+      //   items: [
+      //     {
+      //       title: "Alerts",
+      //       url: "/ui-elements/alerts",
+      //     },
+      //     {
+      //       title: "Buttons",
+      //       url: "/ui-elements/buttons",
+      //     },
+      //   ],
+      // },
       {
-        title: "Charts",
-        icon: Icons.PieChart,
+        title: "Setting",
+        icon: Icons.SettingsIcon,
         items: [
           {
-            title: "Basic Chart",
-            url: "/charts/basic-chart",
-          },
-        ],
-      },
-      {
-        title: "UI Elements",
-        icon: Icons.FourCircle,
-        items: [
-          {
-            title: "Alerts",
-            url: "/ui-elements/alerts",
-          },
-          {
-            title: "Buttons",
-            url: "/ui-elements/buttons",
-          },
-        ],
-      },
-      {
-        title: "Authentication",
-        icon: Icons.Authentication,
-        items: [
-          {
-            title: "Sign In",
-            url: "/auth/sign-in",
+            title: "Change Password",
+            url: "/atlas/settings",
           },
         ],
       },

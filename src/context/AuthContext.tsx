@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setAdminProfile(null);
 
     // optional hard redirect
-    window.location.href = "/admin/login";
+    window.location.href = "/auth";
   };
 
   /* ================= CONTEXT VALUE ================= */
