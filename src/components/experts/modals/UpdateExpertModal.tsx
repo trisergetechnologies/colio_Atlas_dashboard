@@ -122,7 +122,7 @@ export function UpdateExpertModal({
         </div>
 
         {/* BODY */}
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-5 space-y-6">
+        <div className="max-h-[70vh] space-y-6 overflow-y-auto px-6 py-5">
           {/* BASIC */}
           <Section title="Basic Information">
             <Input

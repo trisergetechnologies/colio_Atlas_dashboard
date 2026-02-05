@@ -15,11 +15,15 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { OnboardConsultantModal } from "../modals/OnboardConsultantModal";
 import { UpdateExpertModal } from "../modals/UpdateExpertModal";
+import { Camera } from "lucide-react";
 
 export function ExpertsTable() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [avatarFiles, setAvatarFiles] = useState<Record<string, File>>({});
+  const [avatarUploadingId, setAvatarUploadingId] = useState<string | null>(null);
 
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,6 +76,55 @@ export function ExpertsTable() {
     fetchExperts();
   }, [page, limit]);
 
+  const handleAvatarUpload = async (consultantId: string) => {
+    const file = avatarFiles[consultantId];
+    if (!file) return;
+
+    try {
+      setAvatarUploadingId(consultantId);
+
+      const token = await getToken();
+      const formData = new FormData();
+
+      formData.append("consultantId", consultantId);
+      formData.append("avatar", file);
+
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/consultants/avatar`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Avatar upload failed");
+      }
+
+      // 🔁 Update avatar instantly in table
+      setData((prev) =>
+        prev.map((u) =>
+          u._id === consultantId ? { ...u, avatar: res.data.data.avatar } : u,
+        ),
+      );
+
+      // cleanup
+      setAvatarFiles((prev) => {
+        const copy = { ...prev };
+        delete copy[consultantId];
+        return copy;
+      });
+    } catch (err) {
+      console.error("Avatar upload error:", err);
+      alert("Failed to upload avatar");
+    } finally {
+      setAvatarUploadingId(null);
+    }
+  };
+
+
   const totalPages = Math.ceil(total / limit);
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -101,6 +154,7 @@ export function ExpertsTable() {
             <TableHead>Email</TableHead>
             <TableHead>{"Voice (per min)"}</TableHead>
             <TableHead>{"Video (per min)"}</TableHead>
+            <TableHead>Upload Avatar</TableHead>
             <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
               Average Rating
             </TableHead>
@@ -139,6 +193,50 @@ export function ExpertsTable() {
 
               <TableCell>
                 ₹{expert.consultantProfile?.ratePerMinuteVideo ?? "-"}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  {/* Hidden file input */}
+                  <input
+                    id={`avatar-${expert._id}`}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setAvatarFiles((prev) => ({
+                          ...prev,
+                          [expert._id]: e.target.files![0],
+                        }));
+                      }
+                    }}
+                  />
+
+                  {/* Camera icon */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById(`avatar-${expert._id}`)?.click()
+                    }
+                    className="inline-flex items-center justify-center rounded-md border border-stroke bg-white p-2 text-dark shadow-sm hover:bg-gray-100 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                    title="Choose avatar"
+                  >
+                    <Camera size={20} />
+                  </button>
+
+                  {/* Set button */}
+                  <button
+                    type="button"
+                    disabled={
+                      !avatarFiles[expert._id] ||
+                      avatarUploadingId === expert._id
+                    }
+                    onClick={() => handleAvatarUpload(expert._id)}
+                    className="rounded-md bg-primary px-3 py-1 text-xs text-white disabled:opacity-50"
+                  >
+                    {avatarUploadingId === expert._id ? "Uploading..." : "Set"}
+                  </button>
+                </div>
               </TableCell>
 
               <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
