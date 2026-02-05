@@ -21,10 +21,10 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
     dateOfBirth: "",
     languages: [],
     bio: "",
-    onboardingScore: "",
-    ratePerMinute: "",
-    ratePerMinuteVideo: "",
-    ratePerMinuteChat: "",
+    onboardingScore: 0,
+    ratePerMinute: 0,
+    ratePerMinuteVideo: 0,
+    ratePerMinuteChat: 4,
     availabilityStatus: "offWork",
     isActive: true,
     isVerified: true
@@ -87,14 +87,25 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4 dark:border-dark-3">
           <h3 className="text-lg font-semibold">Onboard Consultant</h3>
-          <button onClick={onClose} className="text-xl font-bold">×</button>
+          <button onClick={onClose} className="text-xl font-bold">
+            ×
+          </button>
         </div>
 
         {/* Body */}
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-5 grid gap-4 sm:grid-cols-2">
-          <Input label="Name" onChange={(v: any) => setForm({ ...form, name: v })} />
-          <Input label="Email" onChange={(v: any) => setForm({ ...form, email: v })} />
-          <Input label="Phone" onChange={(v: any) => setForm({ ...form, phone: v })} />
+        <div className="grid max-h-[70vh] gap-4 overflow-y-auto px-6 py-5 sm:grid-cols-2">
+          <Input
+            label="Name"
+            onChange={(v: any) => setForm({ ...form, name: v })}
+          />
+          <Input
+            label="Email"
+            onChange={(v: any) => setForm({ ...form, email: v })}
+          />
+          <Input
+            label="Phone"
+            onChange={(v: any) => setForm({ ...form, phone: v })}
+          />
 
           {/* Password */}
           <PasswordInput
@@ -150,6 +161,14 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
             onChange={(v: any) => setForm({ ...form, availabilityStatus: v })}
           />
 
+          <LanguagesInput
+            label="Languages"
+            languages={form.languages}
+            onChange={(newLanguages: any) =>
+              setForm({ ...form, languages: newLanguages })
+            }
+          />
+
           {/* Bio */}
           <Textarea
             label="Bio"
@@ -157,9 +176,7 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
           />
         </div>
 
-        {error && (
-          <p className="px-6 pb-2 text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="px-6 pb-2 text-sm text-red-500">{error}</p>}
 
         {/* Footer */}
         <div className="flex justify-end gap-3 border-t px-6 py-4 dark:border-dark-3">
@@ -241,6 +258,102 @@ function PasswordInput({ label, value, show, toggle, onChange }: any) {
       >
         {show ? "Hide" : "Show"}
       </button>
+    </div>
+  );
+}
+
+
+// Predefined languages in user-friendly format
+const predefinedLanguages = [
+  "Assamese",
+  "Bengali",
+  "Bodo",
+  "Dogri",
+  "English",
+  "French",
+  "German",
+  "Gujarati",
+  "Hindi",
+  "Italian",
+  "Kannada",
+  "Kashmiri",
+  "Konkani",
+  "Maithili",
+  "Malayalam",
+  "Manipuri",
+  "Marathi",
+  "Nepali",
+  "Odia",
+  "Persian",
+  "Punjabi",
+  "Rajasthani",
+  "Sanskrit",
+  "Santali",
+  "Sindhi",
+  "Spanish",
+  "Swahili",
+  "Tamil",
+  "Telugu",
+  "Urdu",
+];
+
+function LanguagesInput({ label, languages, onChange }: any) {
+  const [newLanguage, setNewLanguage] = useState("");
+
+  const addLanguage = () => {
+    if (newLanguage && !languages.includes(newLanguage)) {
+      // Convert the selected language to lowercase for backend
+      onChange([...languages, newLanguage.toLowerCase()]);
+      setNewLanguage(""); // Clear input field after adding
+    }
+  };
+
+  const removeLanguage = (language: string) => {
+    onChange(languages.filter((lang: string) => lang !== language));
+  };
+
+  return (
+    <div>
+      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <div className="flex gap-2 items-center">
+        <select
+          value={newLanguage}
+          onChange={(e) => setNewLanguage(e.target.value)}
+          className="w-full rounded-md border px-3 py-2 text-sm outline-none dark:border-dark-3 dark:bg-transparent"
+        >
+          <option value="">Select Language</option>
+          {predefinedLanguages.map((language) => (
+            <option key={language} value={language}>
+              {language}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={addLanguage}
+          className="bg-primary text-white rounded px-3 py-1 text-sm"
+        >
+          Add
+        </button>
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        {languages.map((language: string) => (
+          <span
+            key={language}
+            className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+          >
+            {language.charAt(0).toUpperCase() + language.slice(1)} {/* Capitalizing first letter for display */}
+            <button
+              type="button"
+              onClick={() => removeLanguage(language)}
+              className="text-red-500"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
