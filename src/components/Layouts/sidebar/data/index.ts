@@ -54,6 +54,20 @@ export const NAV_DATA = [
         ],
       },
       {
+        title: "Sessions & Payments",
+        icon: Icons.SettlementIcon,
+        items: [
+          {
+            title: "Sessions",
+            url: "/atlas/sessions",
+          },
+          {
+            title: "Payments",
+            url: "/atlas/payments",
+          },
+        ],
+      },
+      {
         title: "System Wallet",
         url: "/atlas/system",
         icon: Icons.WalletIcon,

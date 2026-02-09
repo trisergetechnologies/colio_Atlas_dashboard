@@ -48,10 +48,20 @@ export function UpdateExpertModal({
           expert.consultantProfile?.availabilityStatus || "offWork",
 
         ratePerMinute: expert.consultantProfile?.ratePerMinute || 0,
-        ratePerMinuteVideo:
-          expert.consultantProfile?.ratePerMinuteVideo || 0,
-        ratePerMinuteChat:
-          expert.consultantProfile?.ratePerMinuteChat || 0,
+        ratePerMinuteVideo: expert.consultantProfile?.ratePerMinuteVideo || 0,
+        ratePerMinuteChat: expert.consultantProfile?.ratePerMinuteChat || 0,
+
+        bankDetails: {
+          accountHolderName:
+            expert.consultantProfile?.bankDetails?.accountHolderName || "",
+          bankName: expert.consultantProfile?.bankDetails?.bankName || "",
+          accountNumber:
+            expert.consultantProfile?.bankDetails?.accountNumber || "",
+          ifscCode: expert.consultantProfile?.bankDetails?.ifscCode || "",
+          upiId: expert.consultantProfile?.bankDetails?.upiId || "",
+          isVerified:
+            expert.consultantProfile?.bankDetails?.isVerified || false,
+        },
       });
     }
   }, [expert]);
@@ -85,7 +95,7 @@ export function UpdateExpertModal({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!res.data?.success) {
@@ -96,9 +106,7 @@ export function UpdateExpertModal({
       onClose();
     } catch (err: any) {
       console.error("Update consultant error:", err);
-      setError(
-        err?.response?.data?.message || "Failed to update consultant"
-      );
+      setError(err?.response?.data?.message || "Failed to update consultant");
     } finally {
       setLoading(false);
     }
@@ -179,17 +187,13 @@ export function UpdateExpertModal({
               label="Onboarding Score"
               type="number"
               value={form.onboardingScore}
-              onChange={(v) =>
-                handleChange("onboardingScore", Number(v))
-              }
+              onChange={(v) => handleChange("onboardingScore", Number(v))}
             />
             <Select
               label="Availability"
               value={form.availabilityStatus}
               options={["onWork", "offWork", "busy"]}
-              onChange={(v) =>
-                handleChange("availabilityStatus", v)
-              }
+              onChange={(v) => handleChange("availabilityStatus", v)}
             />
           </Section>
 
@@ -199,32 +203,93 @@ export function UpdateExpertModal({
               label="Voice"
               type="number"
               value={form.ratePerMinute}
-              onChange={(v) =>
-                handleChange("ratePerMinute", Number(v))
-              }
+              onChange={(v) => handleChange("ratePerMinute", Number(v))}
             />
             <Input
               label="Video"
               type="number"
               value={form.ratePerMinuteVideo}
-              onChange={(v) =>
-                handleChange("ratePerMinuteVideo", Number(v))
-              }
+              onChange={(v) => handleChange("ratePerMinuteVideo", Number(v))}
             />
             <Input
               label="Chat"
               type="number"
               value={form.ratePerMinuteChat}
+              onChange={(v) => handleChange("ratePerMinuteChat", Number(v))}
+            />
+          </Section>
+
+          {/* BANK DETAILS */}
+          <Section title="Bank Details">
+            <Input
+              label="Account Holder Name"
+              value={form.bankDetails?.accountHolderName}
               onChange={(v) =>
-                handleChange("ratePerMinuteChat", Number(v))
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  accountHolderName: v,
+                })
+              }
+            />
+
+            <Input
+              label="Bank Name"
+              value={form.bankDetails?.bankName}
+              onChange={(v) =>
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  bankName: v,
+                })
+              }
+            />
+
+            <Input
+              label="Account Number"
+              value={form.bankDetails?.accountNumber}
+              onChange={(v) =>
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  accountNumber: v,
+                })
+              }
+            />
+
+            <Input
+              label="IFSC Code"
+              value={form.bankDetails?.ifscCode}
+              onChange={(v) =>
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  ifscCode: v.toUpperCase(),
+                })
+              }
+            />
+
+            <Input
+              label="UPI ID"
+              value={form.bankDetails?.upiId}
+              onChange={(v) =>
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  upiId: v,
+                })
+              }
+            />
+
+            <Toggle
+              label="Bank Verified"
+              checked={form.bankDetails?.isVerified}
+              onChange={(v) =>
+                handleChange("bankDetails", {
+                  ...form.bankDetails,
+                  isVerified: v,
+                })
               }
             />
           </Section>
 
           {error && (
-            <div className="text-sm font-medium text-red-500">
-              {error}
-            </div>
+            <div className="text-sm font-medium text-red-500">{error}</div>
           )}
         </div>
 
@@ -246,7 +311,7 @@ export function UpdateExpertModal({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }
 
@@ -269,12 +334,7 @@ function Section({
   );
 }
 
-function Input({
-  label,
-  value,
-  onChange,
-  type = "text",
-}: any) {
+function Input({ label, value, onChange, type = "text" }: any) {
   return (
     <div>
       <label className="mb-1 block text-sm font-medium">{label}</label>
