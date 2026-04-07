@@ -89,6 +89,10 @@ export function UserDetailsModal({
               <Section title="Consultant Profile">
                 <Info label="Bio" value={user.consultantProfile?.bio || "-"} />
                 <Info
+                  label="Category"
+                  value={user.consultantProfile?.category || "-"}
+                />
+                <Info
                   label="Skills"
                   value={user.consultantProfile?.skills?.join(", ") || "-"}
                 />

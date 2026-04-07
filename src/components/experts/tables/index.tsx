@@ -35,6 +35,8 @@ export function ExpertsTable() {
 
   const [isOnboardOpen, setIsOnboardOpen] = useState(false);
 
+  const [statusToggleId, setStatusToggleId] = useState<string | null>(null);
+
   // 🔹 Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -124,6 +126,34 @@ export function ExpertsTable() {
     }
   };
 
+  const handleToggleActive = async (expert: any) => {
+    const id = expert._id;
+    const next = !expert.isActive;
+    try {
+      setStatusToggleId(id);
+      const token = await getToken();
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/updateconsultant/${id}`,
+        { isActive: next },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Update failed");
+      }
+      setData((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isActive: next } : u)),
+      );
+    } catch (err: any) {
+      console.error("Toggle active error:", err);
+      alert(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to update expert status",
+      );
+    } finally {
+      setStatusToggleId(null);
+    }
+  };
 
   const totalPages = Math.ceil(total / limit);
 
@@ -152,6 +182,8 @@ export function ExpertsTable() {
               Name
             </TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>{"Voice (per min)"}</TableHead>
             <TableHead>{"Video (per min)"}</TableHead>
             <TableHead>Upload Avatar</TableHead>
@@ -186,6 +218,40 @@ export function ExpertsTable() {
               </TableCell>
 
               <TableCell>{expert.email}</TableCell>
+
+              <TableCell className="max-w-[140px] truncate" title={expert.consultantProfile?.category}>
+                {expert.consultantProfile?.category ?? "—"}
+              </TableCell>
+
+              <TableCell>
+                <div className="flex flex-col gap-1.5">
+                  <span
+                    className={`inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      expert.isActive
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                        : "bg-zinc-500/15 text-zinc-600 dark:text-zinc-400"
+                    }`}
+                  >
+                    {expert.isActive ? "Active" : "Inactive"}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={statusToggleId === expert._id}
+                    onClick={() => handleToggleActive(expert)}
+                    className={`w-fit rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                      expert.isActive
+                        ? "border border-stroke bg-white text-dark hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                        : "bg-primary text-white hover:bg-primary/90"
+                    } disabled:opacity-50`}
+                  >
+                    {statusToggleId === expert._id
+                      ? "…"
+                      : expert.isActive
+                        ? "Deactivate"
+                        : "Activate"}
+                  </button>
+                </div>
+              </TableCell>
 
               <TableCell>
                 ₹{expert.consultantProfile?.ratePerMinute ?? "-"}

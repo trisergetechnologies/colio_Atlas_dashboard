@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  CONSULTANT_CATEGORIES,
+  CONSULTANT_SKILL_LABELS,
+  CONSULTANT_SKILLS,
+  type ConsultantSkill,
+} from "@/constants/consultantProfile";
 import { getToken } from "@/utils/tokenHelper";
 import axios from "axios";
 import { useState } from "react";
@@ -20,6 +26,8 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
     gender: "",
     dateOfBirth: "",
     languages: [],
+    category: "",
+    skills: [] as string[],
     bio: "",
     onboardingScore: 0,
     ratePerMinute: 0,
@@ -46,8 +54,17 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
         return;
       }
 
+      if (!form.category || !CONSULTANT_CATEGORIES.includes(form.category)) {
+        setError("Please select a listener category");
+        return;
+      }
+
       setLoading(true);
       const token = await getToken();
+
+      const skillsFiltered = (form.skills as string[]).filter((s) =>
+        CONSULTANT_SKILLS.includes(s as ConsultantSkill),
+      );
 
       const payload = {
         ...form,
@@ -55,7 +72,9 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
           ? Number(form.onboardingScore)
           : undefined,
         dateOfBirth: form.dateOfBirth || undefined,
-        languages: form.languages.length ? form.languages : undefined
+        languages: form.languages.length ? form.languages : undefined,
+        category: form.category,
+        skills: skillsFiltered.length ? skillsFiltered : undefined,
       };
 
       delete payload.confirmPassword;
@@ -75,7 +94,11 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || "Failed to onboard consultant");
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to onboard consultant",
+      );
     } finally {
       setLoading(false);
     }
@@ -127,8 +150,16 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
 
           <Select
             label="Gender"
+            value={form.gender}
             options={["male", "female", "other"]}
             onChange={(v: any) => setForm({ ...form, gender: v })}
+          />
+
+          <Select
+            label="Listener category (required)"
+            value={form.category}
+            options={[...CONSULTANT_CATEGORIES]}
+            onChange={(v: any) => setForm({ ...form, category: v })}
           />
 
           <Input
@@ -157,8 +188,15 @@ export function OnboardConsultantModal({ isOpen, onClose, onSuccess }: Props) {
 
           <Select
             label="Availability Status"
+            value={form.availabilityStatus}
             options={["offWork", "onWork", "busy"]}
             onChange={(v: any) => setForm({ ...form, availabilityStatus: v })}
+          />
+
+          <SkillsInput
+            label="Skills (optional)"
+            skills={form.skills}
+            onChange={(next: string[]) => setForm({ ...form, skills: next })}
           />
 
           <LanguagesInput
@@ -224,17 +262,30 @@ function Textarea({ label, onChange }: any) {
   );
 }
 
-function Select({ label, options, onChange }: any) {
+function Select({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value?: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <div>
       <label className="mb-1 block text-sm font-medium">{label}</label>
       <select
+        value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-md border px-3 py-2 text-sm outline-none dark:border-dark-3 dark:bg-transparent"
       >
         <option value="">Select</option>
         {options.map((o: string) => (
-          <option key={o} value={o}>{o}</option>
+          <option key={o} value={o}>
+            {o}
+          </option>
         ))}
       </select>
     </div>
@@ -296,6 +347,67 @@ const predefinedLanguages = [
   "Telugu",
   "Urdu",
 ];
+
+function SkillsInput({
+  label,
+  skills,
+  onChange,
+}: {
+  label: string;
+  skills: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [pick, setPick] = useState<ConsultantSkill | "">("");
+
+  const add = () => {
+    if (pick && !skills.includes(pick)) {
+      onChange([...skills, pick]);
+      setPick("");
+    }
+  };
+
+  const remove = (s: string) => onChange(skills.filter((x) => x !== s));
+
+  return (
+    <div className="sm:col-span-2">
+      <label className="mb-1 block text-sm font-medium">{label}</label>
+      <div className="flex items-center gap-2">
+        <select
+          value={pick}
+          onChange={(e) => setPick(e.target.value as ConsultantSkill | "")}
+          className="w-full rounded-md border px-3 py-2 text-sm outline-none dark:border-dark-3 dark:bg-transparent"
+        >
+          <option value="">Select skill</option>
+          {CONSULTANT_SKILLS.map((s) => (
+            <option key={s} value={s}>
+              {CONSULTANT_SKILL_LABELS[s]}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={add}
+          className="rounded bg-primary px-3 py-1 text-sm text-white"
+        >
+          Add
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {skills.map((s) => (
+          <span
+            key={s}
+            className="flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-sm dark:bg-dark-3"
+          >
+            {CONSULTANT_SKILL_LABELS[s as ConsultantSkill] ?? s}
+            <button type="button" onClick={() => remove(s)} className="text-red-500">
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function LanguagesInput({ label, languages, onChange }: any) {
   const [newLanguage, setNewLanguage] = useState("");

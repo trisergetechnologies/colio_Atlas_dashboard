@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  CONSULTANT_CATEGORIES,
+  CONSULTANT_SKILL_LABELS,
+  CONSULTANT_SKILLS,
+  type ConsultantSkill,
+} from "@/constants/consultantProfile";
 import { getToken } from "@/utils/tokenHelper";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -42,6 +48,7 @@ export function UpdateExpertModal({
         isVerified: expert.isVerified ?? false,
 
         bio: expert.consultantProfile?.bio || "",
+        category: expert.consultantProfile?.category || "",
         skills: expert.consultantProfile?.skills || [],
         onboardingScore: expert.consultantProfile?.onboardingScore || 0,
         availabilityStatus:
@@ -173,16 +180,16 @@ export function UpdateExpertModal({
               value={form.bio}
               onChange={(v) => handleChange("bio", v)}
             />
-            {/* <Input
-              label="Skills (comma separated)"
-              value={form.skills.join(", ")}
-              onChange={(v) =>
-                handleChange(
-                  "skills",
-                  v.split(",").map((s) => s.trim())
-                )
-              }
-            /> */}
+            <Select
+              label="Listener category"
+              value={form.category}
+              options={[...CONSULTANT_CATEGORIES]}
+              onChange={(v) => handleChange("category", v)}
+            />
+            <SkillsMultiSelect
+              skills={form.skills || []}
+              onChange={(next) => handleChange("skills", next)}
+            />
             <Input
               label="Onboarding Score"
               type="number"
@@ -391,6 +398,69 @@ function Toggle({ label, checked, onChange }: any) {
         onChange={(e) => onChange(e.target.checked)}
       />
       <span className="text-sm font-medium">{label}</span>
+    </div>
+  );
+}
+
+function SkillsMultiSelect({
+  skills,
+  onChange,
+}: {
+  skills: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [pick, setPick] = useState<ConsultantSkill | "">("");
+
+  const add = () => {
+    if (pick && !skills.includes(pick)) {
+      onChange([...skills, pick]);
+      setPick("");
+    }
+  };
+
+  const remove = (s: string) => onChange(skills.filter((x) => x !== s));
+
+  return (
+    <div className="sm:col-span-2">
+      <label className="mb-1 block text-sm font-medium">Skills</label>
+      <div className="flex items-center gap-2">
+        <select
+          value={pick}
+          onChange={(e) => setPick(e.target.value as ConsultantSkill | "")}
+          className="w-full rounded-lg border px-3 py-2 text-sm dark:bg-dark-2"
+        >
+          <option value="">Select skill</option>
+          {CONSULTANT_SKILLS.map((s) => (
+            <option key={s} value={s}>
+              {CONSULTANT_SKILL_LABELS[s]}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={add}
+          className="rounded-lg bg-primary px-3 py-2 text-sm text-white"
+        >
+          Add
+        </button>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {skills.map((s) => (
+          <span
+            key={s}
+            className="flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-sm dark:bg-dark-3"
+          >
+            {CONSULTANT_SKILL_LABELS[s as ConsultantSkill] ?? s}
+            <button
+              type="button"
+              onClick={() => remove(s)}
+              className="text-red-500"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
