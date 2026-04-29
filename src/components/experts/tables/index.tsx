@@ -13,6 +13,7 @@ import { getToken } from "@/utils/tokenHelper";
 import axios from "axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { ApproveExpertModal } from "../modals/ApproveExpertModal";
 import { OnboardConsultantModal } from "../modals/OnboardConsultantModal";
 import { UpdateExpertModal } from "../modals/UpdateExpertModal";
 import { Camera } from "lucide-react";
@@ -37,12 +38,16 @@ export function ExpertsTable() {
 
   const [statusToggleId, setStatusToggleId] = useState<string | null>(null);
 
+  const [applicationFilter, setApplicationFilter] = useState<string>("");
+  const [isApproveOpen, setIsApproveOpen] = useState(false);
+  const [selectedForApprove, setSelectedForApprove] = useState<any | null>(null);
+
   // 🔹 Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
 
-      const fetchExperts = async () => {
+  const fetchExperts = async () => {
         try {
           setLoading(true);
           setError(null);
@@ -55,6 +60,9 @@ export function ExpertsTable() {
                 role: "consultant",
                 page,
                 limit,
+                ...(applicationFilter
+                  ? { applicationStatus: applicationFilter }
+                  : {}),
               },
               headers: { Authorization: `Bearer ${token}` },
             },
@@ -76,7 +84,7 @@ export function ExpertsTable() {
 
   useEffect(() => {
     fetchExperts();
-  }, [page, limit]);
+  }, [page, limit, applicationFilter]);
 
   const handleAvatarUpload = async (consultantId: string) => {
     const file = avatarFiles[consultantId];
@@ -160,9 +168,17 @@ export function ExpertsTable() {
   if (loading) return <div className="p-6">Loading...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
 
+  const filterTabs: { id: string; label: string }[] = [
+    { id: "", label: "All" },
+    { id: "pending_approval", label: "Pending review" },
+    { id: "pending_profile", label: "Incomplete" },
+    { id: "approved", label: "Approved" },
+    { id: "rejected", label: "Rejected" },
+  ];
+
   return (
     <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-      <div className="flex items-center justify-between px-6 py-4 sm:px-7 sm:py-5 xl:px-8.5">
+      <div className="flex flex-col gap-3 px-6 py-4 sm:px-7 sm:py-5 xl:px-8.5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold text-dark dark:text-white">
           Experts
         </h2>
@@ -175,6 +191,26 @@ export function ExpertsTable() {
         </button>
       </div>
 
+      <div className="flex flex-wrap gap-2 border-b border-stroke px-6 pb-3 dark:border-dark-3 sm:px-7 xl:px-8.5">
+        {filterTabs.map((t) => (
+          <button
+            key={t.id || "all"}
+            type="button"
+            onClick={() => {
+              setPage(1);
+              setApplicationFilter(t.id);
+            }}
+            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+              applicationFilter === t.id
+                ? "bg-primary text-white"
+                : "bg-gray-200 text-dark dark:bg-dark-3 dark:text-white"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow className="border-t text-base [&>th]:h-auto [&>th]:py-3 sm:[&>th]:py-4.5">
@@ -183,12 +219,16 @@ export function ExpertsTable() {
             </TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Category</TableHead>
+            <TableHead>Application</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>{"Voice (per min)"}</TableHead>
             <TableHead>{"Video (per min)"}</TableHead>
             <TableHead>Upload Avatar</TableHead>
             <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
               Average Rating
+            </TableHead>
+            <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
+              Review
             </TableHead>
             <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
               Edit
@@ -221,6 +261,29 @@ export function ExpertsTable() {
 
               <TableCell className="max-w-[140px] truncate" title={expert.consultantProfile?.category}>
                 {expert.consultantProfile?.category ?? "—"}
+              </TableCell>
+
+              <TableCell>
+                <span
+                  className={`inline-flex max-w-[130px] truncate rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    (expert.consultantProfile?.applicationStatus ?? "approved") ===
+                    "pending_approval"
+                      ? "bg-amber-500/20 text-amber-800"
+                      : (expert.consultantProfile?.applicationStatus ?? "approved") ===
+                          "rejected"
+                        ? "bg-red-500/15 text-red-700"
+                        : (expert.consultantProfile?.applicationStatus ?? "approved") ===
+                            "pending_profile"
+                          ? "bg-sky-500/15 text-sky-800"
+                          : "bg-emerald-500/15 text-emerald-800"
+                  }`}
+                  title={expert.consultantProfile?.applicationStatus ?? "approved"}
+                >
+                  {(expert.consultantProfile?.applicationStatus ?? "approved").replace(
+                    /_/g,
+                    " ",
+                  )}
+                </span>
               </TableCell>
 
               <TableCell>
@@ -309,6 +372,22 @@ export function ExpertsTable() {
                 {expert.consultantProfile?.ratingAverage?.toFixed(1) || "0.0"}
               </TableCell>
               <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
+                {expert.consultantProfile?.applicationStatus === "pending_approval" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedForApprove(expert);
+                      setIsApproveOpen(true);
+                    }}
+                    className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white"
+                  >
+                    Review
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-400">—</span>
+                )}
+              </TableCell>
+              <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
                 <button
                   onClick={() => {
                     setSelectedExpertForEdit(expert);
@@ -372,6 +451,16 @@ export function ExpertsTable() {
         isOpen={isOnboardOpen}
         onClose={() => setIsOnboardOpen(false)}
         onSuccess={() => fetchExperts()}
+      />
+
+      <ApproveExpertModal
+        isOpen={isApproveOpen}
+        onClose={() => {
+          setIsApproveOpen(false);
+          setSelectedForApprove(null);
+        }}
+        expert={selectedForApprove}
+        onDone={() => fetchExperts()}
       />
 
       <UpdateExpertModal
