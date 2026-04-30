@@ -184,6 +184,44 @@ export function UserDetailsModal({
                   value={user.consultantProfile?.bankDetails?.upiId || "-"}
                 />
               </Section>
+
+              <Section title="Application & Documents">
+                <Info
+                  label="Application Status"
+                  value={user.consultantProfile?.applicationStatus || "approved"}
+                />
+                <Info
+                  label="Agreement"
+                  value={
+                    user.consultantProfile?.agreement?.signed
+                      ? `Signed (${user.consultantProfile?.agreement?.version || "v1.0"})`
+                      : "Not signed"
+                  }
+                />
+              </Section>
+
+              {!!user.documents?.length && (
+                <Section title="Uploaded Documents">
+                  <div className="sm:col-span-2 grid grid-cols-2 gap-3">
+                    {user.documents.map((doc: any, idx: number) => (
+                      <div
+                        key={`${doc.type}-${idx}`}
+                        className="rounded-md border border-stroke p-2 dark:border-dark-3"
+                      >
+                        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-dark-4 dark:text-dark-6">
+                          {doc.type}
+                        </p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={doc.url}
+                          alt={doc.type}
+                          className="h-28 w-full rounded object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
             </>
           )}
 

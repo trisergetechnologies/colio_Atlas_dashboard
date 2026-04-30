@@ -211,7 +211,7 @@ export function ExpertsTable() {
         ))}
       </div>
 
-      <Table>
+      <Table className="min-w-[1450px]">
         <TableHeader>
           <TableRow className="border-t text-base [&>th]:h-auto [&>th]:py-3 sm:[&>th]:py-4.5">
             <TableHead className="min-w-[120px] pl-5 sm:pl-6 xl:pl-7.5">
