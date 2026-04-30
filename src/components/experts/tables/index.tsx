@@ -216,20 +216,20 @@ export function ExpertsTable() {
 
   return (
     <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-      <div className="flex flex-col gap-3 px-6 py-4 sm:px-7 sm:py-5 xl:px-8.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 xl:px-8.5">
         <h2 className="text-2xl font-bold text-dark dark:text-white">
           Experts
         </h2>
 
         <button
           onClick={() => setIsOnboardOpen(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
         >
           + Onboard Consultant
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-stroke px-6 pb-3 dark:border-dark-3 sm:px-7 xl:px-8.5">
+      <div className="flex flex-wrap gap-2 border-b border-stroke px-6 pb-4 dark:border-dark-3 sm:px-7 xl:px-8.5">
         {filterTabs.map((t) => (
           <button
             key={t.id || "all"}
@@ -238,10 +238,10 @@ export function ExpertsTable() {
               setPage(1);
               setApplicationFilter(t.id);
             }}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               applicationFilter === t.id
-                ? "bg-primary text-white"
-                : "bg-gray-200 text-dark dark:bg-dark-3 dark:text-white"
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-dark-3 dark:text-gray-300 dark:hover:bg-dark-2"
             }`}
           >
             {t.label}
@@ -251,27 +251,18 @@ export function ExpertsTable() {
 
       <Table>
         <TableHeader>
-          <TableRow className="border-t [&>th]:h-auto [&>th]:py-3">
-            <TableHead className="min-w-[180px] pl-5 sm:pl-6 xl:pl-7.5">
+          <TableRow className="border-t [&>th]:h-auto [&>th]:py-3 [&>th]:whitespace-nowrap">
+            <TableHead className="min-w-[200px] pl-5 sm:pl-6 xl:pl-7.5">
               Name
             </TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Application</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>{"Voice (per min)"}</TableHead>
-            <TableHead>{"Video (per min)"}</TableHead>
-            <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-              Rating
-            </TableHead>
-            <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-              Review
-            </TableHead>
-            <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-              Edit
-            </TableHead>
-            <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-              Details
+            <TableHead className="min-w-[120px]">Category</TableHead>
+            <TableHead className="min-w-[120px]">Application</TableHead>
+            <TableHead className="min-w-[110px]">Status</TableHead>
+            <TableHead className="min-w-[80px] text-right">Voice</TableHead>
+            <TableHead className="min-w-[80px] text-right">Video</TableHead>
+            <TableHead className="min-w-[70px] text-right">Rating</TableHead>
+            <TableHead className="min-w-[140px] pr-5 text-right sm:pr-6 xl:pr-7.5">
+              Actions
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -283,33 +274,36 @@ export function ExpertsTable() {
               className="text-sm font-medium text-dark dark:text-white"
             >
               <TableCell className="pl-5 sm:pl-6 xl:pl-7.5">
-                <div className="flex min-w-fit items-center gap-3">
+                <div className="flex items-center gap-3">
                   <ExpertAvatar expert={expert} />
-                  <div>{expert.name}</div>
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{expert.name}</div>
+                    <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                      {expert.email}
+                    </div>
+                  </div>
                 </div>
               </TableCell>
 
-              <TableCell className="max-w-[220px] truncate" title={expert.email}>
-                {expert.email}
-              </TableCell>
-
-              <TableCell className="max-w-[140px] truncate" title={expert.consultantProfile?.category}>
-                {expert.consultantProfile?.category ?? "—"}
+              <TableCell>
+                <span className="truncate" title={expert.consultantProfile?.category}>
+                  {expert.consultantProfile?.category ?? "—"}
+                </span>
               </TableCell>
 
               <TableCell>
                 <span
-                  className={`inline-flex max-w-[130px] truncate rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                     (expert.consultantProfile?.applicationStatus ?? "approved") ===
                     "pending_approval"
-                      ? "bg-amber-500/20 text-amber-800"
+                      ? "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400"
                       : (expert.consultantProfile?.applicationStatus ?? "approved") ===
                           "rejected"
-                        ? "bg-red-500/15 text-red-700"
+                        ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"
                         : (expert.consultantProfile?.applicationStatus ?? "approved") ===
                             "pending_profile"
-                          ? "bg-sky-500/15 text-sky-800"
-                          : "bg-emerald-500/15 text-emerald-800"
+                          ? "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-400"
+                          : "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-400"
                   }`}
                   title={expert.consultantProfile?.applicationStatus ?? "approved"}
                 >
@@ -321,12 +315,12 @@ export function ExpertsTable() {
               </TableCell>
 
               <TableCell>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col items-start gap-1.5">
                   <span
-                    className={`inline-flex w-fit rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       expert.isActive
-                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
-                        : "bg-zinc-500/15 text-zinc-600 dark:text-zinc-400"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
+                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-500/15 dark:text-zinc-400"
                     }`}
                   >
                     {expert.isActive ? "Active" : "Inactive"}
@@ -335,9 +329,9 @@ export function ExpertsTable() {
                     type="button"
                     disabled={statusToggleId === expert._id}
                     onClick={() => handleToggleActive(expert)}
-                    className={`w-fit rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
                       expert.isActive
-                        ? "border border-stroke bg-white text-dark hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                        ? "border border-stroke text-dark hover:bg-gray-50 dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
                         : "bg-primary text-white hover:bg-primary/90"
                     } disabled:opacity-50`}
                   >
@@ -350,34 +344,20 @@ export function ExpertsTable() {
                 </div>
               </TableCell>
 
-              <TableCell>
-                ₹{expert.consultantProfile?.ratePerMinute ?? "-"}
+              <TableCell className="text-right">
+                ₹{expert.consultantProfile?.ratePerMinute ?? "—"}
               </TableCell>
 
-              <TableCell>
-                ₹{expert.consultantProfile?.ratePerMinuteVideo ?? "-"}
+              <TableCell className="text-right">
+                ₹{expert.consultantProfile?.ratePerMinuteVideo ?? "—"}
               </TableCell>
-              <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
+
+              <TableCell className="text-right">
                 {expert.consultantProfile?.ratingAverage?.toFixed(1) || "0.0"}
               </TableCell>
-              <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-                {expert.consultantProfile?.applicationStatus === "pending_approval" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedForApprove(expert);
-                      setIsApproveOpen(true);
-                    }}
-                    className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white"
-                  >
-                    Review
-                  </button>
-                ) : (
-                  <span className="text-xs text-gray-400">—</span>
-                )}
-              </TableCell>
-              <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-                <div className="flex items-center justify-end gap-2">
+
+              <TableCell className="pr-5 sm:pr-6 xl:pr-7.5">
+                <div className="flex items-center justify-end gap-1.5">
                   <input
                     id={`avatar-${expert._id}`}
                     type="file"
@@ -392,34 +372,46 @@ export function ExpertsTable() {
                       }
                     }}
                   />
+                  {expert.consultantProfile?.applicationStatus === "pending_approval" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedForApprove(expert);
+                        setIsApproveOpen(true);
+                      }}
+                      className="rounded-md bg-amber-500 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-amber-600"
+                      title="Review application"
+                    >
+                      Review
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() =>
                       document.getElementById(`avatar-${expert._id}`)?.click()
                     }
-                    className="inline-flex items-center justify-center rounded-md border border-stroke bg-white p-2 text-dark shadow-sm hover:bg-gray-100 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-                    title="Choose profile photo"
+                    className="inline-flex items-center justify-center rounded-md border border-stroke p-1.5 text-gray-500 hover:bg-gray-100 hover:text-dark dark:border-dark-3 dark:text-gray-400 dark:hover:bg-dark-3 dark:hover:text-white"
+                    title="Upload avatar"
                   >
-                    <Camera size={16} />
+                    <Camera size={15} />
                   </button>
-                  <button
-                    type="button"
-                    disabled={
-                      !avatarFiles[expert._id] ||
-                      avatarUploadingId === expert._id
-                    }
-                    onClick={() => handleAvatarUpload(expert._id)}
-                    className="rounded-md bg-primary px-2.5 py-1 text-xs text-white disabled:opacity-50"
-                  >
-                    {avatarUploadingId === expert._id ? "..." : "Set"}
-                  </button>
+                  {avatarFiles[expert._id] && (
+                    <button
+                      type="button"
+                      disabled={avatarUploadingId === expert._id}
+                      onClick={() => handleAvatarUpload(expert._id)}
+                      className="rounded-md bg-primary px-2 py-1.5 text-xs text-white disabled:opacity-50"
+                    >
+                      {avatarUploadingId === expert._id ? "…" : "Set"}
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setSelectedExpertForEdit(expert);
                       setIsEditModalOpen(true);
                     }}
                     title="Edit Expert"
-                    className="inline-flex items-center justify-center rounded-md p-2 text-primary transition hover:bg-primary/10"
+                    className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:bg-primary/10 hover:text-primary dark:text-gray-400"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -430,43 +422,48 @@ export function ExpertsTable() {
                       <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.243l-4 1.333a1 1 0 01-1.264-1.264l1.333-4a1 1 0 01.243-.39l9.9-9.9a2 2 0 012.828 0zM15 4l-9.193 9.193-.47 1.41 1.41-.47L16 5l-1-1z" />
                     </svg>
                   </button>
+                  <button
+                    onClick={() => {
+                      setSelectedUser(expert);
+                      setIsModalOpen(true);
+                    }}
+                    title="View details"
+                    className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-dark dark:text-gray-400 dark:hover:bg-dark-3 dark:hover:text-white"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
-              </TableCell>
-              <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-                <button
-                  onClick={() => {
-                    setSelectedUser(expert);
-                    setIsModalOpen(true);
-                  }}
-                  className="font-medium text-primary"
-                >
-                  →
-                </button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
-      {/* 🔹 Pagination controls (logic only, no theme change) */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between border-t border-stroke px-6 py-4 dark:border-dark-3">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
-            className="text-sm font-medium disabled:opacity-50"
+            className="rounded-md border border-stroke px-3 py-1.5 text-sm font-medium transition hover:bg-gray-50 disabled:opacity-40 dark:border-dark-3 dark:hover:bg-dark-3"
           >
             Previous
           </button>
 
-          <span className="text-sm">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
 
           <button
             disabled={page === totalPages}
             onClick={() => setPage((p) => p + 1)}
-            className="text-sm font-medium disabled:opacity-50"
+            className="rounded-md border border-stroke px-3 py-1.5 text-sm font-medium transition hover:bg-gray-50 disabled:opacity-40 dark:border-dark-3 dark:hover:bg-dark-3"
           >
             Next
           </button>
