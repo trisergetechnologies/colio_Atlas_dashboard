@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/table";
 import { getToken } from "@/utils/tokenHelper";
 import axios from "axios";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ApproveExpertModal } from "../modals/ApproveExpertModal";
 import { OnboardConsultantModal } from "../modals/OnboardConsultantModal";
@@ -164,6 +163,10 @@ export function ExpertsTable() {
   };
 
   const totalPages = Math.ceil(total / limit);
+  const getAvatarSrc = (expert: any) =>
+    expert?.avatar && String(expert.avatar).trim().length > 0
+      ? expert.avatar
+      : "/images/avatar/default.png";
 
   if (loading) return <div className="p-6">Loading...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
@@ -211,10 +214,10 @@ export function ExpertsTable() {
         ))}
       </div>
 
-      <Table className="min-w-[1450px]">
+      <Table>
         <TableHeader>
-          <TableRow className="border-t text-base [&>th]:h-auto [&>th]:py-3 sm:[&>th]:py-4.5">
-            <TableHead className="min-w-[120px] pl-5 sm:pl-6 xl:pl-7.5">
+          <TableRow className="border-t [&>th]:h-auto [&>th]:py-3">
+            <TableHead className="min-w-[180px] pl-5 sm:pl-6 xl:pl-7.5">
               Name
             </TableHead>
             <TableHead>Email</TableHead>
@@ -223,9 +226,8 @@ export function ExpertsTable() {
             <TableHead>Status</TableHead>
             <TableHead>{"Voice (per min)"}</TableHead>
             <TableHead>{"Video (per min)"}</TableHead>
-            <TableHead>Upload Avatar</TableHead>
             <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-              Average Rating
+              Rating
             </TableHead>
             <TableHead className="pr-5 text-right sm:pr-6 xl:pr-7.5">
               Review
@@ -243,21 +245,26 @@ export function ExpertsTable() {
           {data.map((expert) => (
             <TableRow
               key={expert._id}
-              className="text-base font-medium text-dark dark:text-white"
+              className="text-sm font-medium text-dark dark:text-white"
             >
-              <TableCell className="flex min-w-fit items-center gap-3 pl-5 sm:pl-6 xl:pl-7.5">
-                <Image
-                  src={expert.avatar || "/images/avatar/default.png"}
-                  className="aspect-[6/5] w-15 rounded-[5px] object-cover"
-                  width={60}
-                  height={50}
-                  alt="Expert avatar"
-                  role="presentation"
+              <TableCell className="pl-5 sm:pl-6 xl:pl-7.5">
+                <div className="flex min-w-fit items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getAvatarSrc(expert)}
+                  className="h-11 w-11 rounded-full border border-stroke object-cover"
+                  alt={`${expert.name} avatar`}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/images/avatar/default.png";
+                  }}
                 />
                 <div>{expert.name}</div>
+                </div>
               </TableCell>
 
-              <TableCell>{expert.email}</TableCell>
+              <TableCell className="max-w-[220px] truncate" title={expert.email}>
+                {expert.email}
+              </TableCell>
 
               <TableCell className="max-w-[140px] truncate" title={expert.consultantProfile?.category}>
                 {expert.consultantProfile?.category ?? "—"}
@@ -323,51 +330,6 @@ export function ExpertsTable() {
               <TableCell>
                 ₹{expert.consultantProfile?.ratePerMinuteVideo ?? "-"}
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {/* Hidden file input */}
-                  <input
-                    id={`avatar-${expert._id}`}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setAvatarFiles((prev) => ({
-                          ...prev,
-                          [expert._id]: e.target.files![0],
-                        }));
-                      }
-                    }}
-                  />
-
-                  {/* Camera icon */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      document.getElementById(`avatar-${expert._id}`)?.click()
-                    }
-                    className="inline-flex items-center justify-center rounded-md border border-stroke bg-white p-2 text-dark shadow-sm hover:bg-gray-100 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-                    title="Choose avatar"
-                  >
-                    <Camera size={20} />
-                  </button>
-
-                  {/* Set button */}
-                  <button
-                    type="button"
-                    disabled={
-                      !avatarFiles[expert._id] ||
-                      avatarUploadingId === expert._id
-                    }
-                    onClick={() => handleAvatarUpload(expert._id)}
-                    className="rounded-md bg-primary px-3 py-1 text-xs text-white disabled:opacity-50"
-                  >
-                    {avatarUploadingId === expert._id ? "Uploading..." : "Set"}
-                  </button>
-                </div>
-              </TableCell>
-
               <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
                 {expert.consultantProfile?.ratingAverage?.toFixed(1) || "0.0"}
               </TableCell>
@@ -388,23 +350,60 @@ export function ExpertsTable() {
                 )}
               </TableCell>
               <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
-                <button
-                  onClick={() => {
-                    setSelectedExpertForEdit(expert);
-                    setIsEditModalOpen(true);
-                  }}
-                  title="Edit Expert"
-                  className="inline-flex items-center justify-center rounded-md p-2 text-primary transition hover:bg-primary/10"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                <div className="flex items-center justify-end gap-2">
+                  <input
+                    id={`avatar-${expert._id}`}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setAvatarFiles((prev) => ({
+                          ...prev,
+                          [expert._id]: e.target.files![0],
+                        }));
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById(`avatar-${expert._id}`)?.click()
+                    }
+                    className="inline-flex items-center justify-center rounded-md border border-stroke bg-white p-2 text-dark shadow-sm hover:bg-gray-100 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                    title="Choose profile photo"
                   >
-                    <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.243l-4 1.333a1 1 0 01-1.264-1.264l1.333-4a1 1 0 01.243-.39l9.9-9.9a2 2 0 012.828 0zM15 4l-9.193 9.193-.47 1.41 1.41-.47L16 5l-1-1z" />
-                  </svg>
-                </button>
+                    <Camera size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={
+                      !avatarFiles[expert._id] ||
+                      avatarUploadingId === expert._id
+                    }
+                    onClick={() => handleAvatarUpload(expert._id)}
+                    className="rounded-md bg-primary px-2.5 py-1 text-xs text-white disabled:opacity-50"
+                  >
+                    {avatarUploadingId === expert._id ? "..." : "Set"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedExpertForEdit(expert);
+                      setIsEditModalOpen(true);
+                    }}
+                    title="Edit Expert"
+                    className="inline-flex items-center justify-center rounded-md p-2 text-primary transition hover:bg-primary/10"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M17.414 2.586a2 2 0 010 2.828l-9.9 9.9a1 1 0 01-.39.243l-4 1.333a1 1 0 01-1.264-1.264l1.333-4a1 1 0 01.243-.39l9.9-9.9a2 2 0 012.828 0zM15 4l-9.193 9.193-.47 1.41 1.41-.47L16 5l-1-1z" />
+                    </svg>
+                  </button>
+                </div>
               </TableCell>
               <TableCell className="pr-5 text-right sm:pr-6 xl:pr-7.5">
                 <button
