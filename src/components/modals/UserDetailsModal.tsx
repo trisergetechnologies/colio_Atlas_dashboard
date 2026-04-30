@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { getDefaultAvatarUrl, resolveImageUrl } from "@/utils/imageUrl";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -43,12 +43,16 @@ export function UserDetailsModal({
         {/* ================= HEADER ================= */}
         <div className="flex items-center justify-between border-b border-stroke px-6 py-4 dark:border-dark-3">
           <div className="flex items-center gap-4">
-            <Image
-              src={user.avatar || "/images/avatar/default.png"}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={resolveImageUrl(user.avatar)}
               alt="avatar"
               width={48}
               height={48}
-              className="rounded-full"
+              className="h-12 w-12 rounded-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = getDefaultAvatarUrl();
+              }}
             />
             <div>
               <h3 className="text-lg font-semibold text-dark dark:text-white">
@@ -213,7 +217,7 @@ export function UserDetailsModal({
                         </p>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={doc.url}
+                          src={resolveImageUrl(doc.url)}
                           alt={doc.type}
                           className="h-28 w-full rounded object-cover"
                         />

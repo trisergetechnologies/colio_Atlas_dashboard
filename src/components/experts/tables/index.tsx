@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getToken } from "@/utils/tokenHelper";
+import { getDefaultAvatarUrl, resolveImageUrl } from "@/utils/imageUrl";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { ApproveExpertModal } from "../modals/ApproveExpertModal";
@@ -36,6 +37,7 @@ export function ExpertsTable() {
   const [isOnboardOpen, setIsOnboardOpen] = useState(false);
 
   const [statusToggleId, setStatusToggleId] = useState<string | null>(null);
+  const [brokenAvatars, setBrokenAvatars] = useState<Record<string, boolean>>({});
 
   const [applicationFilter, setApplicationFilter] = useState<string>("");
   const [isApproveOpen, setIsApproveOpen] = useState(false);
@@ -163,10 +165,10 @@ export function ExpertsTable() {
   };
 
   const totalPages = Math.ceil(total / limit);
-  const getAvatarSrc = (expert: any) =>
-    expert?.avatar && String(expert.avatar).trim().length > 0
-      ? expert.avatar
-      : "/images/avatar/default.png";
+  const getAvatarSrc = (expert: any) => {
+    if (brokenAvatars[expert._id]) return getDefaultAvatarUrl();
+    return resolveImageUrl(expert?.avatar);
+  };
 
   if (loading) return <div className="p-6">Loading...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
@@ -255,7 +257,8 @@ export function ExpertsTable() {
                   className="h-11 w-11 rounded-full border border-stroke object-cover"
                   alt={`${expert.name} avatar`}
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/images/avatar/default.png";
+                    setBrokenAvatars((prev) => ({ ...prev, [expert._id]: true }));
+                    (e.currentTarget as HTMLImageElement).src = getDefaultAvatarUrl();
                   }}
                 />
                 <div>{expert.name}</div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/tokenHelper";
+import { resolveImageUrl } from "@/utils/imageUrl";
 import axios from "axios";
 import { useState } from "react";
 import { createPortal } from "react-dom";
@@ -139,13 +140,14 @@ export function ApproveExpertModal({ isOpen, onClose, expert, onDone }: Props) {
             ["profile_photo", "Profile photo"],
           ].map(([type, label]) => {
             const url = docByType(type);
+            const resolvedUrl = resolveImageUrl(url);
             return (
               <div key={type} className="rounded border border-stroke p-2 dark:border-dark-3">
                 <div className="text-xs font-medium">{label}</div>
                 {url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={url}
+                    src={resolvedUrl}
                     alt={label}
                     className="mt-2 max-h-40 w-full rounded object-contain"
                   />
