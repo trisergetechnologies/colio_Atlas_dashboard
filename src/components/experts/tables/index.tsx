@@ -12,11 +12,49 @@ import {
 import { getToken } from "@/utils/tokenHelper";
 import { getDefaultAvatarUrl, resolveImageUrl } from "@/utils/imageUrl";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApproveExpertModal } from "../modals/ApproveExpertModal";
 import { OnboardConsultantModal } from "../modals/OnboardConsultantModal";
 import { UpdateExpertModal } from "../modals/UpdateExpertModal";
 import { Camera } from "lucide-react";
+
+function ExpertAvatar({ expert }: { expert: any }) {
+  const [failed, setFailed] = useState(false);
+  const attempted = useRef(false);
+
+  const rawUrl = expert?.avatar
+    || expert?.documents?.find((d: any) => d?.type === "profile_photo")?.url;
+  const resolved = rawUrl ? resolveImageUrl(rawUrl) : null;
+
+  const initials = (expert?.name || "?")
+    .split(" ")
+    .slice(0, 2)
+    .map((w: string) => w[0]?.toUpperCase() || "")
+    .join("");
+
+  if (!resolved || failed) {
+    return (
+      <div className="flex h-11 w-11 items-center justify-center rounded-full border border-stroke bg-primary/10 text-sm font-bold text-primary">
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={resolved}
+      className="h-11 w-11 rounded-full border border-stroke object-cover"
+      alt={`${expert.name} avatar`}
+      onError={() => {
+        if (!attempted.current) {
+          attempted.current = true;
+          setFailed(true);
+        }
+      }}
+    />
+  );
+}
 
 export function ExpertsTable() {
   const [data, setData] = useState<any[]>([]);
@@ -164,15 +202,6 @@ export function ExpertsTable() {
   };
 
   const totalPages = Math.ceil(total / limit);
-  const getAvatarSrc = (expert: any) => {
-    const avatar = expert?.avatar;
-    if (avatar && String(avatar).trim().length > 0) {
-      return resolveImageUrl(avatar);
-    }
-    const profileDoc = expert?.documents?.find((d: any) => d?.type === "profile_photo")?.url;
-    if (profileDoc) return resolveImageUrl(profileDoc);
-    return getDefaultAvatarUrl();
-  };
 
   if (loading) return <div className="p-6">Loading...</div>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
@@ -255,17 +284,8 @@ export function ExpertsTable() {
             >
               <TableCell className="pl-5 sm:pl-6 xl:pl-7.5">
                 <div className="flex min-w-fit items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={getAvatarSrc(expert)}
-                  className="h-11 w-11 rounded-full border border-stroke object-cover"
-                  alt={`${expert.name} avatar`}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    (e.currentTarget as HTMLImageElement).src = getDefaultAvatarUrl();
-                  }}
-                />
-                <div>{expert.name}</div>
+                  <ExpertAvatar expert={expert} />
+                  <div>{expert.name}</div>
                 </div>
               </TableCell>
 
