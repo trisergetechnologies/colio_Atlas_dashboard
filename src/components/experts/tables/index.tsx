@@ -37,7 +37,6 @@ export function ExpertsTable() {
   const [isOnboardOpen, setIsOnboardOpen] = useState(false);
 
   const [statusToggleId, setStatusToggleId] = useState<string | null>(null);
-  const [brokenAvatars, setBrokenAvatars] = useState<Record<string, boolean>>({});
 
   const [applicationFilter, setApplicationFilter] = useState<string>("");
   const [isApproveOpen, setIsApproveOpen] = useState(false);
@@ -166,8 +165,13 @@ export function ExpertsTable() {
 
   const totalPages = Math.ceil(total / limit);
   const getAvatarSrc = (expert: any) => {
-    if (brokenAvatars[expert._id]) return getDefaultAvatarUrl();
-    return resolveImageUrl(expert?.avatar);
+    const avatar = expert?.avatar;
+    if (avatar && String(avatar).trim().length > 0) {
+      return resolveImageUrl(avatar);
+    }
+    const profileDoc = expert?.documents?.find((d: any) => d?.type === "profile_photo")?.url;
+    if (profileDoc) return resolveImageUrl(profileDoc);
+    return getDefaultAvatarUrl();
   };
 
   if (loading) return <div className="p-6">Loading...</div>;
@@ -257,7 +261,7 @@ export function ExpertsTable() {
                   className="h-11 w-11 rounded-full border border-stroke object-cover"
                   alt={`${expert.name} avatar`}
                   onError={(e) => {
-                    setBrokenAvatars((prev) => ({ ...prev, [expert._id]: true }));
+                    e.currentTarget.onerror = null;
                     (e.currentTarget as HTMLImageElement).src = getDefaultAvatarUrl();
                   }}
                 />

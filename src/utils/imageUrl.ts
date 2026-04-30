@@ -20,6 +20,10 @@ export function resolveImageUrl(url?: string | null) {
     return `${apiOrigin}${value}`;
   }
 
+  if (value.startsWith("uploads/")) {
+    return `${apiOrigin}/${value}`;
+  }
+
   if (/^https?:\/\/localhost[:/]/i.test(value) || /^https?:\/\/127\.0\.0\.1[:/]/i.test(value)) {
     try {
       const pathname = new URL(value).pathname;

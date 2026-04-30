@@ -36,6 +36,8 @@ export function UserDetailsModal({
   if (!mounted || !isOpen || !user) return null;
 
   const isConsultant = user.role === "consultant";
+  const profileDocAvatar = user?.documents?.find((d: any) => d?.type === "profile_photo")?.url;
+  const resolvedAvatar = resolveImageUrl(user.avatar || profileDocAvatar);
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
@@ -45,12 +47,13 @@ export function UserDetailsModal({
           <div className="flex items-center gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={resolveImageUrl(user.avatar)}
+              src={resolvedAvatar}
               alt="avatar"
               width={48}
               height={48}
               className="h-12 w-12 rounded-full object-cover"
               onError={(e) => {
+                e.currentTarget.onerror = null;
                 (e.currentTarget as HTMLImageElement).src = getDefaultAvatarUrl();
               }}
             />
